@@ -14,12 +14,13 @@ def ensure_database_schema(conn):
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS session_state (
-            current_session_id INTEGER NOT NULL
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            current_session_id INTEGER NOT NULL DEFAULT 1
         )
         """
     )
     conn.execute(
-        "INSERT OR IGNORE INTO session_state (current_session_id) VALUES (1)"
+        "INSERT OR IGNORE INTO session_state (id, current_session_id) VALUES (1, 1)"
     )
     conn.execute(
         """
@@ -90,7 +91,7 @@ def ensure_database_schema(conn):
 
 
 def get_current_session_id(conn):
-    query = "SELECT current_session_id FROM session_state LIMIT 1"
+    query = "SELECT current_session_id FROM session_state WHERE id = 1"
     result = pd.read_sql_query(query, conn)
     if result.empty:
         return 1
@@ -99,7 +100,7 @@ def get_current_session_id(conn):
 
 def set_current_session_id(conn, session_id):
     conn.execute(
-        "UPDATE session_state SET current_session_id = ?",
+        "UPDATE session_state SET current_session_id = ? WHERE id = 1",
         (session_id,),
     )
     conn.commit()

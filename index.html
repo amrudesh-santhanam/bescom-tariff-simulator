@@ -122,6 +122,25 @@
             updateCharts();
         }
 
+        function clearChartInstances() {
+            if (billChartInst) {
+                billChartInst.destroy();
+                billChartInst = null;
+            }
+            if (penaltyChartInst) {
+                penaltyChartInst.destroy();
+                penaltyChartInst = null;
+            }
+            if (dailyChartInst) {
+                dailyChartInst.destroy();
+                dailyChartInst = null;
+            }
+            if (energyChartInst) {
+                energyChartInst.destroy();
+                energyChartInst = null;
+            }
+        }
+
         async function loadDatabase() {
             const SQL = await initSqlJs({
                 locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/${file}`
@@ -169,6 +188,7 @@
 
         function updateCharts() {
             const selectedCase = document.getElementById('caseSelector').value;
+            clearChartInstances();
 
             if (dataStd.length > 0 && dataDem.length > 0) {
                 const stdFiltered = dataStd.filter(d => getProp(d, 'case_name') === selectedCase);
@@ -176,7 +196,6 @@
                 
                 const labels = stdFiltered.map(d => (getProp(d, 'Sanctioned_Load_kW') || getProp(d, 'sanctioned_load_kw') || '0') + ' kW');
 
-                if (billChartInst) billChartInst.destroy();
                 billChartInst = new Chart(document.getElementById('billChart').getContext('2d'), {
                     type: 'bar',
                     data: {
@@ -195,7 +214,6 @@
                     }
                 });
 
-                if (penaltyChartInst) penaltyChartInst.destroy();
                 penaltyChartInst = new Chart(document.getElementById('penaltyChart').getContext('2d'), {
                     type: 'bar',
                     data: {
@@ -219,7 +237,6 @@
 
             if (dataDaily.length > 0) {
                 const caseDaily = dataDaily.filter(d => getProp(d, 'case_name') === selectedCase);
-                if (dailyChartInst) dailyChartInst.destroy();
                 dailyChartInst = new Chart(document.getElementById('dailyChart').getContext('2d'), {
                     type: 'line',
                     data: {
@@ -252,7 +269,6 @@
 
             if (dataEnergy.length > 0) {
                 const targetCol = selectedCase.replace('_kW', '_kWh');
-                if (energyChartInst) energyChartInst.destroy();
                 energyChartInst = new Chart(document.getElementById('energyChart').getContext('2d'), {
                     type: 'bar',
                     data: {
