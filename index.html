@@ -184,7 +184,12 @@
         }
 
         document.getElementById('caseSelector').addEventListener('change', updateCharts);
-        document.getElementById('sessionSelector').addEventListener('change', loadSessionData);
+        document.getElementById('sessionSelector').addEventListener('change', () => {
+            const sessionStatus = document.getElementById('sessionStatus');
+            sessionStatus.textContent = '';
+            sessionStatus.style.color = '';
+            loadSessionData();
+        });
 
         function updateCharts() {
             const selectedCase = document.getElementById('caseSelector').value;
