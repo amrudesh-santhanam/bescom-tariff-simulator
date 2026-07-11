@@ -2,6 +2,15 @@ import pandas as pd
 import numpy as np
 from datetime import timedelta
 
+from sqlite_store import (
+    DB_PATH,
+    ensure_database_schema,
+    get_connection,
+    get_next_session_id,
+    save_dataframe_to_table,
+)
+
+
 def generate_load_profile():
     days_in_month = 30
     interval_mins = 15
@@ -60,20 +69,26 @@ def generate_load_profile():
     data['Case_4_kW'] = case4
 
     df = pd.DataFrame(data)
-    df.to_csv('factory_load_data.csv', index=False)
-    
-    # Generate Daily Energy Consumption CSV
-    df['Date'] = df['Timestamp'].dt.date
-    daily_energy = df.groupby('Date').agg({
-        'Case_1_kW': lambda x: (x * 0.25).sum(),
-        'Case_2_kW': lambda x: (x * 0.25).sum(),
-        'Case_3_kW': lambda x: (x * 0.25).sum(),
-        'Case_4_kW': lambda x: (x * 0.25).sum()
-    }).reset_index()
-    daily_energy.columns = ['Date', 'Case_1_kWh', 'Case_2_kWh', 'Case_3_kWh', 'Case_4_kWh']
-    daily_energy.to_csv('daily_energy_consumption.csv', index=False)
-    
-    print("Generated 'factory_load_data.csv' and 'daily_energy_consumption.csv' successfully.")
+
+    with get_connection() as conn:
+        ensure_database_schema(conn)
+        session_id = get_next_session_id(conn, 'factory_load_data')
+
+        save_dataframe_to_table(df, 'factory_load_data', conn, session_id)
+
+        daily_df = df.copy()
+        daily_df['Date'] = daily_df['Timestamp'].dt.date
+        daily_energy = daily_df.groupby('Date').agg({
+            'Case_1_kW': lambda x: (x * 0.25).sum(),
+            'Case_2_kW': lambda x: (x * 0.25).sum(),
+            'Case_3_kW': lambda x: (x * 0.25).sum(),
+            'Case_4_kW': lambda x: (x * 0.25).sum()
+        }).reset_index()
+        daily_energy.columns = ['Date', 'Case_1_kWh', 'Case_2_kWh', 'Case_3_kWh', 'Case_4_kWh']
+        daily_energy.insert(0, 'session_id', session_id)
+        daily_energy.to_sql('daily_energy_consumption', conn, if_exists='append', index=False)
+
+    print(f"Generated and saved data to '{DB_PATH}' successfully with session_id={session_id}.")
 
 if __name__ == "__main__":
     generate_load_profile()
