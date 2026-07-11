@@ -100,6 +100,8 @@ BESCOM charges a premium (+$1.00/kWh) during peak hours (06:00-09:00, 18:00-22:0
 
 ## 📝 Additional Notes
 
+* **Git Executable Bit:** If the startup script should stay executable in a Git repository, mark the permission in the index so it persists across clones and environments:
+  `git update-index --chmod=+x start-web-app.sh`
 * **Time of Day (ToD) Pricing:** The simulator actively applies ToD pricing to the energy charges. Usage between 06:00–09:00 and 18:00–22:00 incurs a Rs. 1.00 penalty per unit, while nighttime usage (22:00–06:00) receives a Rs. 1.00 rebate.
 * **15-Minute Intervals:** Maximum Demand (MD) is calculated based on 15-minute integration periods, which accurately reflects how standard industrial Tri-Vector meters capture peak demand.
 * **Data Privacy:** The HTML dashboard relies entirely on client-side JavaScript and the local SQLite database file. The page loads `data.db` through `sql.js` in the browser, so the data stays on your machine and is not uploaded to any remote server.
