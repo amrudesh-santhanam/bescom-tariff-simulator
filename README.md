@@ -46,8 +46,8 @@ Make sure you have Python installed, along with the `pandas` and `numpy` librari
    `python calculate_bill.py`
 
 3. **Serve the Dashboard Locally:**
-   From the project directory, start a simple web server:
-   `python -m http.server 8080`
+   From the project directory, start the local dashboard server using the provided script:
+   `./start-web-app.sh`
 
 4. **View the Dashboard:**
    Open the page at `http://127.0.0.1:8080/` in any modern web browser (Chrome, Edge, Safari, Firefox).
